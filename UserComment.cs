@@ -1,9 +1,14 @@
-﻿namespace Prog2Comments
+﻿using System.Runtime.InteropServices;
+
+namespace Prog2Comments
 {
-    public class UserComment
+    public class UserComment : IComparable<UserComment>
     {
         private string rawComment;
         private string sanitizedComment = "";
+        private string rawTitle;
+        private string sanitizedTitle = "";
+        private DateTime createdTimestamp;
 
         public string RawComment
         {
@@ -16,39 +21,69 @@
             get { return sanitizedComment; }
             set { sanitizedComment = value; }
         }
-        public UserComment(string rawComment)
+        public string RawTitle
+        {
+            get { return rawTitle; }
+            set { rawTitle = value; }
+        }
+        public string SanitizedTitle
+        {
+            get { return sanitizedTitle; }
+            set { sanitizedTitle = value; }
+        }
+        public DateTime CreatedTimestamp {
+            get { return createdTimestamp; }
+            set { createdTimestamp = value; }
+        }
+        public UserComment(string rawComment, string rawTitle)
         {
             this.rawComment = rawComment;
-            sanitizedComment = SanitizeService.SanitizeText(rawComment);  //TODO: will sanitize this here
+            sanitizedComment = SanitizeService.SanitizeText(rawComment);
+            this.rawTitle = rawTitle;
+            sanitizedTitle = SanitizeService.SanitizeText(rawTitle);
+            createdTimestamp = DateTime.Now;
         }
 
-    }
-
-
-    // NOTE: Generated code may require at least .NET Framework 4.5 or .NET Core/Standard 2.0.
-    /// <remarks/>
-    [System.SerializableAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.purgomalum.com")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.purgomalum.com", IsNullable = false)]
-    public partial class PurgoMalum
-    {
-
-        private string resultField;
-
-        /// <remarks/>
-        public string result
+        public override bool Equals(object? obj)
         {
-            get
+            if (!(obj is UserComment))
             {
-                return this.resultField;
+                return false;
             }
-            set
+            var userComment = (UserComment)obj;
+            if (userComment.SanitizedComment.Equals(SanitizedComment) && userComment.SanitizedTitle.Equals(SanitizedTitle))
             {
-                this.resultField = value;
+                return true;
             }
+            return base.Equals(obj);
+        }
+
+        public static bool operator ==(UserComment left, UserComment right)
+        {
+            return left.Equals(right);
+        }
+        public static bool operator !=(UserComment left, UserComment right)
+        {
+            return !left.Equals(right);
+        }
+
+        public override int GetHashCode()
+        {
+            return (SanitizedComment, SanitizedTitle).GetHashCode();
+        }
+
+        public int CompareTo(UserComment? other)
+        {
+
+            int result = string.Compare(SanitizedTitle, other.SanitizedTitle, ignoreCase: true);
+            if (result == 0)
+            {
+                result = string.Compare(SanitizedComment, other.SanitizedComment, ignoreCase: true);
+            }
+            return result;
         }
     }
 
 
+    
 }

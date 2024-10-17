@@ -1,6 +1,7 @@
 ﻿<PageTitle>Comment Section</PageTitle>
 
 <h3>Add a new comment...</h3>
+<input placeholder="Enter title here..." @bind="commentTitle"/>
 <input placeholder="Enter comment here..." @bind="commentText"/>
 <button @onclick="SubmitComment">Submit Comment</button>
 
@@ -8,23 +9,47 @@
     @foreach (var comment in comments)
     {
         <li>
+            <p>@comment.SanitizedTitle</p>
             <p>@comment.SanitizedComment</p>
+            <p>@DateHelper.FormatDate(comment.CreatedTimestamp)</p>
         </li>
     }
 </ul>
+<button @onclick="SortComments">Sort Comments</button>
 
 @code {
     private string? commentText;
+    private string? commentTitle;
     private List<UserComment> comments = new();
 
     private void SubmitComment()
     {
         if(!string.IsNullOrWhiteSpace(commentText))
         {
-            UserComment newComment = new UserComment(commentText);
-            comments.Add(newComment);
+            UserComment newComment = new UserComment(commentText, commentTitle);
+            if (!CheckIfDuplicateComment(newComment))
+            {
+                comments.Add(newComment);
+            }
             commentText = string.Empty;
-
+            commentTitle = string.Empty;
         }
+    }
+
+    private bool CheckIfDuplicateComment(UserComment comment)
+    {
+        foreach (var commentToCompare in comments)
+        {
+            if (comment.Equals(commentToCompare))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void SortComments()
+    {
+        comments.Sort();
     }
 }
